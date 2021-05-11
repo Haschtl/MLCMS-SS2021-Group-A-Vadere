@@ -204,17 +204,26 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 				c.addObject(p);
 			}
 			for(Pedestrian p : c.getElements()) {
-				// loop over neighbors and set infected if we are close
-				for(Pedestrian p_neighbor : c.getObjects(p.getPosition(),5)) {
-					if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())
-						continue;
-					double dist = p.getPosition().distance(p_neighbor.getPosition());
-					if (dist < attributesSIRG.getInfectionMaxDistance() &&
-							this.random.nextDouble() < attributesSIRG.getInfectionRate() * (this.timeStep != 0 ? timeStep / 0.4 : 1) ) {
-						SIRGroup g = getGroup(p);
-						if (g.getID() == SIRType.ID_SUSCEPTIBLE.ordinal()) {
-							elementRemoved(p);
-							assignToGroup(p, SIRType.ID_INFECTED.ordinal());
+				// Probability for an infected person to become recovered
+				if (getGroup(p).getID() == SIRType.ID_RECOVERED.ordinal()){
+					continue;
+				}
+				if(getGroup(p).getID() == SIRType.ID_INFECTED.ordinal() && this.random.nextDouble() < attributesSIRG.getRecoveryRate()){
+					assignToGroup(p, SIRType.ID_RECOVERED.ordinal());
+				}
+				else{
+					// loop over neighbors and set infected if we are close
+					for(Pedestrian p_neighbor : c.getObjects(p.getPosition(),5)) {
+						if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())
+							continue;
+						double dist = p.getPosition().distance(p_neighbor.getPosition());
+						if (dist < attributesSIRG.getInfectionMaxDistance() &&
+								this.random.nextDouble() < attributesSIRG.getInfectionRate() * (this.timeStep != 0 ? timeStep / 0.4 : 1) ) {
+							SIRGroup g = getGroup(p);
+							if (g.getID() == SIRType.ID_SUSCEPTIBLE.ordinal()) {
+								// elementRemoved(p);
+								assignToGroup(p, SIRType.ID_INFECTED.ordinal());
+							}
 						}
 					}
 				}
