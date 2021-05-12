@@ -112,9 +112,9 @@ public abstract class SimulationModel<T extends DefaultSimulationConfig> extends
 			} else if (groupId == 1) {
 				c = Color.BLUE;
 			} else if (groupId == 2) {
-				c = Color.BLACK;
-			} else if (groupId == 3) {
 				c = Color.YELLOW;
+			} else if (groupId == 3) {
+				c = Color.BLACK;
 			} else {
 				c = new Color(Color.HSBtoRGB(random.nextFloat(), 1f, 0.75f));
 			}

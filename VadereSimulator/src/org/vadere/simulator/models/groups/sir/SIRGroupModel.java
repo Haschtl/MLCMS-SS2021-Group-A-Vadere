@@ -11,7 +11,7 @@ import org.vadere.simulator.models.potential.fields.IPotentialFieldTarget;
 import org.vadere.simulator.projects.Domain;
 import org.vadere.state.attributes.Attributes;
 import org.vadere.simulator.models.groups.sir.SIRGroup;
-import org.vadere.state.attributes.AttributesSimulation;
+// import org.vadere.state.attributes.AttributesSimulation;
 import org.vadere.state.attributes.models.AttributesSIRG;
 import org.vadere.state.attributes.scenario.AttributesAgent;
 import org.vadere.state.scenario.DynamicElementContainer;
@@ -31,7 +31,7 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 	private LinkedHashMap<Integer, SIRGroup> groupsById;
 	private Map<Integer, LinkedList<SIRGroup>> sourceNextGroups;
 	private AttributesSIRG attributesSIRG;
-	private AttributesSimulation attributesSimulation;
+	// private AttributesSimulation attributesSimulation;
 	private Topography topography;
 	private IPotentialFieldTarget potentialFieldTarget;
 	private int totalInfected = 0;
@@ -66,6 +66,11 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 	}
 
 	private int getFreeGroupId() {
+		// if(!getGroupsById().containsKey(SIRType.ID_RECOVERED.ordinal()))
+		// {
+		// 	SIRGroup g = getNewGroup(SIRType.ID_RECOVERED.ordinal(), Integer.MAX_VALUE/2);
+		// 	getGroupsById().put(SIRType.ID_RECOVERED.ordinal(), g);
+		// }
 		if(this.random.nextDouble() < this.attributesSIRG.getInfectionRate()
         || this.totalInfected < this.attributesSIRG.getInfectionsAtStart()) {
 			if(!getGroupsById().containsKey(SIRType.ID_INFECTED.ordinal()))
@@ -138,6 +143,49 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 		if (c.getElements().size() > 0) {
 			// TODO: fill in code to assign pedestrians in the scenario at the beginning (i.e., not created by a source)
             //  to INFECTED or SUSCEPTIBLE groups.
+
+			
+			// if(!getGroupsById().containsKey(SIRType.ID_INFECTED.ordinal()))
+			// {
+			// 	SIRGroup g = getNewGroup(SIRType.ID_INFECTED.ordinal(), Integer.MAX_VALUE/2);
+			// 	getGroupsById().put(SIRType.ID_INFECTED.ordinal(), g);
+			// }
+			// if(!getGroupsById().containsKey(SIRType.ID_SUSCEPTIBLE.ordinal()))
+			// {
+			// 	SIRGroup g = getNewGroup(SIRType.ID_SUSCEPTIBLE.ordinal(), Integer.MAX_VALUE/2);
+			// 	getGroupsById().put(SIRType.ID_SUSCEPTIBLE.ordinal(), g);
+			// }
+			// if(!getGroupsById().containsKey(SIRType.ID_RECOVERED.ordinal()))
+			// {
+			// 	SIRGroup g = getNewGroup(SIRType.ID_RECOVERED.ordinal(), Integer.MAX_VALUE/2);
+			// 	getGroupsById().put(SIRType.ID_RECOVERED.ordinal(), g);
+			// }
+			// Map<Integer, List<Pedestrian>> groups = new HashMap<>();
+
+			// // aggregate group data
+			// c.getElements().forEach(p -> {
+			// 	for (Integer id : p.getGroupIds()) {
+			// 		List<Pedestrian> peds = groups.computeIfAbsent(id, k -> new ArrayList<>());
+			// 		// empty group id and size values, will be set later on
+			// 		p.setGroupIds(new LinkedList<>());
+			// 		p.setGroupSizes(new LinkedList<>());
+			// 		peds.add(p);
+			// 	}
+			// });
+
+
+			// // build groups depending on group ids and register pedestrian
+			// for (Integer id : groups.keySet()) {
+			// 	List<Pedestrian> peds = groups.get(id);
+			// 	SIRGroup group = getNewGroup(id, Integer.MAX_VALUE/2);
+			// 	peds.forEach(p -> {
+			// 		// update group id / size info on ped
+			// 		p.getGroupIds().add(id);
+			// 		p.getGroupSizes().add(peds.size());
+			// 		group.addMember(p);
+			// 		registerMember(p, group);
+			// 	});
+			// }
 		}
 	}
 
@@ -204,11 +252,13 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 				c.addObject(p);
 			}
 			for(Pedestrian p : c.getElements()) {
-				// Probability for an infected person to become recovered
+				// If person is recovered, continue
 				if (getGroup(p).getID() == SIRType.ID_RECOVERED.ordinal()){
 					continue;
 				}
-				if(getGroup(p).getID() == SIRType.ID_INFECTED.ordinal() && this.random.nextDouble() < attributesSIRG.getRecoveryRate()){
+				// Probability for an infected person to become recovered
+				if(getGroup(p).getID() == SIRType.ID_INFECTED.ordinal() && this.random.nextDouble() < attributesSIRG.getRecoveryRate() *  (this.timeStep != 0 ? timeStep / 0.4 : 1)){
+					elementRemoved(p);
 					assignToGroup(p, SIRType.ID_RECOVERED.ordinal());
 				}
 				else{
@@ -221,7 +271,7 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 								this.random.nextDouble() < attributesSIRG.getInfectionRate() * (this.timeStep != 0 ? timeStep / 0.4 : 1) ) {
 							SIRGroup g = getGroup(p);
 							if (g.getID() == SIRType.ID_SUSCEPTIBLE.ordinal()) {
-								// elementRemoved(p);
+								elementRemoved(p);
 								assignToGroup(p, SIRType.ID_INFECTED.ordinal());
 							}
 						}
